@@ -9,18 +9,16 @@ echo "🚀 Starting Render build..."
 echo "📦 Installing npm dependencies..."
 npm install
 
-PUPPETEER_CACHE_DIR=/opt/render/.cache/puppeteer
+# Set Puppeteer cache directory to use Render's persistent cache
+export PUPPETEER_CACHE_DIR=/opt/render/.cache/puppeteer
+
+# Create cache directory if it doesn't exist
 mkdir -p $PUPPETEER_CACHE_DIR
 
+# Install Chrome (will use cached version if available)
+echo "🌐 Installing Chrome for Puppeteer..."
 npx puppeteer browsers install chrome
 
-if [[ ! -d $PUPPETEER_CACHE_DIR ]]; then
-echo "...Copying Puppeteer Cache from Build Cache"
-# Copying from the actual path where Puppeteer stores its Chrome binary
-cp -R /opt/render/.cache/puppeteer/chrome/linux-143.0.7499.42/chrome-linux64/ $PUPPETEER_CACHE_DIR
-else
-echo "...Storing Puppeteer Cache in Build Cache"
-cp -R $PUPPETEER_CACHE_DIR /opt/render/.cache/puppeteer/chrome/linux-143.0.7499.42/chrome-linux64/
-fi
+echo "✓ Chrome installed at: $PUPPETEER_CACHE_DIR"
 
 echo "✅ Build completed successfully!"

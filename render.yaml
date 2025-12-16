@@ -5,17 +5,15 @@ services:
     runtime: node
     plan: free
     rootDir: .
-    buildCommand: npm install && node setup-puppeteer.js
+    buildCommand: ./render-build.sh
     startCommand: node server.js
     envVars:
       # These will be set in Render dashboard
       - key: NODE_ENV
         value: production
-      # Puppeteer configuration for Render
+      # Puppeteer configuration for Render (uses Render's build cache)
       - key: PUPPETEER_CACHE_DIR
-        value: /opt/render/.cache/puppeteer
-      - key: PUPPETEER_SKIP_DOWNLOAD
-        value: false
+        value: /opt/render/project/puppeteer
       # All other env vars should be set in Render dashboard:
       # - BASE_URL
       # - CITY

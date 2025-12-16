@@ -1,0 +1,35 @@
+# Files to ignore during Render deployment
+# Similar to .gitignore but specific to Render
+
+# Local environment
+.env
+.env.local
+.env.*.local
+
+# Development files
+*.md
+!README.md
+
+# Test files
+test/
+tests/
+*.test.js
+*.spec.js
+
+# Documentation (optional - remove lines below if you want docs in deployment)
+SETUP_GUIDE.md
+DEPLOYMENT.md
+QUICK_DEPLOY.md
+MULTIPLE_RECIPIENTS.md
+
+# Output files
+apartments.json
+apartments.csv
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

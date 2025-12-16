@@ -1,0 +1,37 @@
+services:
+  # Background Worker for monitoring
+  - type: worker
+    name: idealista-monitor
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run monitor
+    envVars:
+      # These will be set in Render dashboard
+      - key: NODE_ENV
+        value: production
+      # All other env vars should be set in Render dashboard:
+      # - BASE_URL
+      # - CITY
+      # - PROVINCE
+      # - MAX_PRICE
+      # - BEDROOMS
+      # - BATHROOMS
+      # - AIR_CONDITIONING
+      # - ALLOW_PETS
+      # - PUBLISHED_FILTER
+      # - RENTAL_TYPE
+      # - SORT_ORDER
+      # - MAX_PAGES
+      # - REQUEST_DELAY_MIN
+      # - REQUEST_DELAY_MAX
+      # - OUTPUT_JSON
+      # - OUTPUT_CSV
+      # - MONGODB_URI (required)
+      # - MONGODB_DATABASE
+      # - TWILIO_ACCOUNT_SID (required)
+      # - TWILIO_AUTH_TOKEN (required)
+      # - TWILIO_WHATSAPP_FROM (required)
+      # - TWILIO_WHATSAPP_TO (required)
+      # - MONITOR_SCHEDULE
+      # - NOTIFICATION_MODE

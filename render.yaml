@@ -4,6 +4,7 @@ services:
     name: idealista-monitor
     env: node
     plan: free
+    rootDir: .
     buildCommand: npm install
     startCommand: node server.js
     envVars:

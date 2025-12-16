@@ -2,15 +2,20 @@ services:
   # Web Service with background monitoring (Free Tier compatible)
   - type: web
     name: idealista-monitor
-    env: node
+    runtime: node
     plan: free
     rootDir: .
-    buildCommand: npm install
+    buildCommand: npm install && npx puppeteer browsers install chrome
     startCommand: node server.js
     envVars:
       # These will be set in Render dashboard
       - key: NODE_ENV
         value: production
+      # Puppeteer configuration for Render
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: false
+      - key: PUPPETEER_EXECUTABLE_PATH
+        sync: false
       # All other env vars should be set in Render dashboard:
       # - BASE_URL
       # - CITY

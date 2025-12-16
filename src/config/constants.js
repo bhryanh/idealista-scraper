@@ -90,6 +90,7 @@ const SEARCH_URL = buildSearchUrl();
  */
 const BROWSER_CONFIG = {
   headless: true,
+  // Use Puppeteer's bundled Chromium (works both locally and on Render)
   args: [
     "--no-sandbox",
     "--disable-setuid-sandbox",
@@ -98,6 +99,10 @@ const BROWSER_CONFIG = {
     "--disable-gpu",
     "--disable-software-rasterizer",
     "--disable-extensions",
+    "--disable-accelerated-2d-canvas",
+    "--no-first-run",
+    "--no-zygote",
+    "--single-process",
   ],
 };
 

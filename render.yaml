@@ -5,17 +5,17 @@ services:
     runtime: node
     plan: free
     rootDir: .
-    buildCommand: npm install && npx puppeteer browsers install chrome
+    buildCommand: npm install && node setup-puppeteer.js
     startCommand: node server.js
     envVars:
       # These will be set in Render dashboard
       - key: NODE_ENV
         value: production
       # Puppeteer configuration for Render
-      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+      - key: PUPPETEER_CACHE_DIR
+        value: /opt/render/.cache/puppeteer
+      - key: PUPPETEER_SKIP_DOWNLOAD
         value: false
-      - key: PUPPETEER_EXECUTABLE_PATH
-        sync: false
       # All other env vars should be set in Render dashboard:
       # - BASE_URL
       # - CITY

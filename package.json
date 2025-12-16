@@ -9,6 +9,7 @@
     "monitor": "node monitor.js --cron",
     "monitor:once": "node monitor.js",
     "server": "node server.js",
+    "postinstall": "node -e \"console.log('Puppeteer cache dir:', process.env.PUPPETEER_CACHE_DIR || 'default')\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {

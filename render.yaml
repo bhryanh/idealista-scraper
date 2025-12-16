@@ -1,11 +1,11 @@
 services:
-  # Background Worker for monitoring
-  - type: worker
+  # Web Service with background monitoring (Free Tier compatible)
+  - type: web
     name: idealista-monitor
     env: node
     plan: free
     buildCommand: npm install
-    startCommand: npm run monitor
+    startCommand: node server.js
     envVars:
       # These will be set in Render dashboard
       - key: NODE_ENV

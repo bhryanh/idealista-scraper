@@ -87,6 +87,7 @@ After deployment:
 ## Common Issues
 
 ### MongoDB Connection Failed
+
 ```
 ❌ Check:
 - Network access allows 0.0.0.0/0
@@ -95,6 +96,7 @@ After deployment:
 ```
 
 ### Twilio Authentication Failed
+
 ```
 ❌ Check:
 - Account SID correct
@@ -103,6 +105,7 @@ After deployment:
 ```
 
 ### WhatsApp Not Sending
+
 ```
 ❌ Check:
 - Phone numbers joined sandbox
@@ -111,6 +114,7 @@ After deployment:
 ```
 
 ### Service Crashes
+
 ```
 ❌ Check logs for:
 - Missing environment variables
@@ -145,15 +149,15 @@ REQUEST_DELAY_MAX=5000
 OUTPUT_JSON=apartments.json
 OUTPUT_CSV=apartments.csv
 
-# MongoDB
-MONGODB_URI=mongodb+srv://bhryanperpetuo:rIHoBpV0pUuX9vFj@cluster0.gvhzfkm.mongodb.net/?retryWrites=true&w=majority
+# MongoDB (REQUIRED - get from MongoDB Atlas)
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority
 MONGODB_DATABASE=idealista_scraper
 
-# Twilio
-TWILIO_ACCOUNT_SID=ACbbc64afb15e5dfdd59b95671cbca530e
-TWILIO_AUTH_TOKEN=69d6b50b97649d8d3cb4be3876dd9bd4
+# Twilio WhatsApp (REQUIRED - get from Twilio)
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=your_auth_token_here
 TWILIO_WHATSAPP_FROM=+14155238886
-TWILIO_WHATSAPP_TO=+553898644574,+5531988657473
+TWILIO_WHATSAPP_TO=+5511999999999,+5522988888888
 
 # Monitor
 MONITOR_SCHEDULE=*/10 * * * *

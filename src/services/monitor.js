@@ -168,8 +168,13 @@ class MonitorService {
         const stats = await this.database.getStats();
         console.log("\n📈 Database Statistics:");
         console.log(`   Total apartments: ${stats.total}`);
-        console.log(`   Notified: ${stats.notified}`);
-        console.log(`   Not notified: ${stats.notNotified}`);
+        if (this.useEmailNotifications) {
+          console.log(`   Notified via email: ${stats.notified}`);
+          console.log(`   Pending notification: ${stats.notNotified}`);
+        } else {
+          console.log(`   Tracked apartments: ${stats.total}`);
+          console.log(`   (Email notifications disabled)`);
+        }
       } else {
         console.log("\n📈 Cache Statistics:");
         console.log(`   Total seen apartments: ${this.seenApartments.size}`);

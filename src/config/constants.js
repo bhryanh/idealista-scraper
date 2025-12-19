@@ -85,45 +85,12 @@ const BASE_URL = process.env.BASE_URL || "https://www.idealista.com";
 const SEARCH_URL = buildSearchUrl();
 
 /**
- * Browser configuration settings
- * Optimized for both local development and cloud deployment
+ * Scrape.do API configuration
+ * Get your token from https://www.scrape.do/dashboard
  */
-const BROWSER_CONFIG = {
-  headless: true,
-  // Use Puppeteer's bundled Chromium (works both locally and on Render)
-  args: [
-    "--no-sandbox",
-    "--disable-setuid-sandbox",
-    "--disable-blink-features=AutomationControlled",
-    "--disable-dev-shm-usage",
-    "--disable-gpu",
-    "--disable-software-rasterizer",
-    "--disable-extensions",
-    "--disable-accelerated-2d-canvas",
-    "--no-first-run",
-    "--no-zygote",
-  ],
-};
-
-/**
- * User agent string to simulate a real browser
- */
-const USER_AGENT =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
-
-/**
- * Viewport configuration
- */
-const VIEWPORT = {
-  width: 1920,
-  height: 1080,
-};
-
-/**
- * HTTP headers for requests
- */
-const HTTP_HEADERS = {
-  "Accept-Language": "es-ES,es;q=0.9,pt-BR;q=0.8,pt;q=0.7,en;q=0.6",
+const SCRAPE_DO_CONFIG = {
+  apiUrl: process.env.SCRAPE_DO_API_URL || "http://api.scrape.do",
+  token: process.env.SCRAPE_DO_TOKEN,
 };
 
 /**
@@ -148,10 +115,7 @@ const OUTPUT_FILES = {
 module.exports = {
   BASE_URL,
   SEARCH_URL,
-  BROWSER_CONFIG,
-  USER_AGENT,
-  VIEWPORT,
-  HTTP_HEADERS,
+  SCRAPE_DO_CONFIG,
   SCRAPER_SETTINGS,
   OUTPUT_FILES,
 };

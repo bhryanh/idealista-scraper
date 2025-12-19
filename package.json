@@ -9,8 +9,7 @@
     "monitor": "node monitor.js --cron",
     "monitor:once": "node monitor.js",
     "server": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "npx puppeteer browsers install chrome"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -19,7 +18,7 @@
   "keywords": [
     "scraper",
     "idealista",
-    "puppeteer",
+    "scrape.do",
     "web-scraping",
     "apartments",
     "monitoring",
@@ -35,7 +34,6 @@
     "express": "^5.2.1",
     "mongodb": "^7.0.0",
     "node-cron": "^4.2.1",
-    "puppeteer": "^24.33.0",
     "twilio": "^5.10.7"
   }
 }

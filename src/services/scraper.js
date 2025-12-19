@@ -1,4 +1,4 @@
-const BrowserManager = require("./browser");
+const HttpClient = require("./httpClient");
 const { parseListings } = require("../parsers/listingParser");
 const { sleep } = require("../utils/helpers");
 const { SEARCH_URL, SCRAPER_SETTINGS } = require("../config/constants");
@@ -9,7 +9,7 @@ const { SEARCH_URL, SCRAPER_SETTINGS } = require("../config/constants");
  */
 class IdealistaScraper {
   constructor() {
-    this.browserManager = new BrowserManager();
+    this.httpClient = new HttpClient();
   }
 
   /**
@@ -42,7 +42,7 @@ class IdealistaScraper {
     const url = this.buildPageUrl(pageNumber);
 
     try {
-      const html = await this.browserManager.getPageContent(url);
+      const html = await this.httpClient.getPageContent(url);
       const listings = parseListings(html);
 
       return listings;
@@ -95,10 +95,10 @@ class IdealistaScraper {
   }
 
   /**
-   * Close the browser and cleanup resources
+   * Close the HTTP client and cleanup resources
    */
   async close() {
-    await this.browserManager.close();
+    await this.httpClient.close();
   }
 }
 

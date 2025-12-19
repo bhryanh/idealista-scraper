@@ -43,7 +43,9 @@ class MonitorService {
 
     try {
       console.log("\n" + "=".repeat(60));
-      console.log(`🔍 Starting apartment check at ${startTime.toLocaleString()}`);
+      console.log(
+        `🔍 Starting apartment check at ${startTime.toLocaleString()}`
+      );
       console.log("=".repeat(60) + "\n");
 
       // Scrape apartments (only first page for monitoring)
@@ -74,7 +76,9 @@ class MonitorService {
 
       // Send notifications for new apartments
       if (newApartments.length > 0) {
-        console.log(`\n📤 Sending notifications for ${newApartments.length} new apartment(s)...`);
+        console.log(
+          `\n📤 Sending notifications for ${newApartments.length} new apartment(s)...`
+        );
 
         const notificationMode = process.env.NOTIFICATION_MODE || "summary";
 

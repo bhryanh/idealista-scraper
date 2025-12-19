@@ -21,6 +21,7 @@ class DatabaseService {
         throw new Error("MONGODB_URI is not defined in environment variables");
       }
 
+      console.log("Connecting to MongoDB...");
       this.client = new MongoClient(uri);
       await this.client.connect();
 

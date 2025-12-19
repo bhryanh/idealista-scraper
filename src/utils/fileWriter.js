@@ -1,12 +1,11 @@
 const fs = require("fs");
-const { OUTPUT_FILES } = require("../config/constants");
 
 /**
  * Save data to a JSON file
  * @param {Array|Object} data - Data to save
  * @param {string} filename - Output filename (defaults to apartments.json)
  */
-function saveToJson(data, filename = OUTPUT_FILES.json) {
+function saveToJson(data, filename = "apartments.json") {
   try {
     fs.writeFileSync(filename, JSON.stringify(data, null, 2), "utf-8");
     console.log(`\n💾 Data saved to ${filename}`);
@@ -21,7 +20,7 @@ function saveToJson(data, filename = OUTPUT_FILES.json) {
  * @param {Array} data - Array of objects to save as CSV
  * @param {string} filename - Output filename (defaults to apartments.csv)
  */
-function saveToCsv(data, filename = OUTPUT_FILES.csv) {
+function saveToCsv(data, filename = "apartments.csv") {
   if (!data || data.length === 0) {
     console.log("No data to save.");
     return;

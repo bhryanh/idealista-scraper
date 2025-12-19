@@ -4,8 +4,11 @@
 # Node modules
 node_modules/
 
-# Output files
+# Output files (legacy - no longer used)
 *.csv
+*.json
+!package.json
+!package-lock.json
 
 # OS files
 .DS_Store

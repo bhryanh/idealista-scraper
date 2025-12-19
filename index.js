@@ -2,11 +2,10 @@
  * Idealista Scraper - Main Entry Point
  *
  * Scrapes apartment listings from Idealista.com
- * and exports them to JSON and CSV formats.
  */
 
 const IdealistaScraper = require("./src/services/scraper");
-const { saveToJson, saveToCsv, displayResults } = require("./src/utils/fileWriter");
+const { displayResults } = require("./src/utils/fileWriter");
 const { SCRAPER_SETTINGS } = require("./src/config/constants");
 
 /**
@@ -27,10 +26,6 @@ async function main() {
 
     // Display first few results
     displayResults(apartments, 3);
-
-    // Save to JSON and CSV files
-    saveToJson(apartments);
-    saveToCsv(apartments);
 
     console.log("\n✅ Scraping completed successfully!");
   } catch (error) {

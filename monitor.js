@@ -96,12 +96,14 @@ Usage:
 
 Environment Variables:
   MONITOR_SCHEDULE            Cron schedule (default: */10 * * * *)
+  MONITOR_MAX_PAGES           Number of pages to scrape (default: 1)
   NOTIFICATION_MODE           'individual' or 'summary' (default: summary)
-  MONGODB_URI                MongoDB connection string
-  TWILIO_ACCOUNT_SID         Twilio account SID
-  TWILIO_AUTH_TOKEN          Twilio auth token
-  TWILIO_WHATSAPP_FROM       Twilio WhatsApp number
-  TWILIO_WHATSAPP_TO         Your WhatsApp number
+  USE_DATABASE                Enable/disable database (default: true)
+  USE_EMAIL_NOTIFICATIONS     Enable/disable email notifications (default: true)
+  MONGODB_URI                 MongoDB connection string
+  EMAIL_USER                  Email sender address
+  EMAIL_PASSWORD              Email password or app password
+  EMAIL_TO                    Email recipient(s) (comma-separated)
 
 Examples:
   # Run once

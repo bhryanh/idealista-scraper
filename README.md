@@ -1,18 +1,18 @@
 # Idealista Scraper
 
-A web scraper for extracting apartment listings from Idealista.com, built with Node.js, Puppeteer, and Cheerio. Includes automated monitoring with WhatsApp notifications.
+A web scraper for extracting apartment listings from Idealista.com, built with Node.js, Puppeteer, and Cheerio. Includes automated monitoring with email notifications.
 
 ## Features
 
 - 🏠 Scrapes apartment listings from Idealista.com
 - 📄 Supports pagination (multiple pages)
-- 💾 Exports data to JSON and CSV formats
 - 🤖 Browser automation with anti-detection measures
-- 🗄️ MongoDB integration for tracking listings
-- 📱 WhatsApp notifications for new apartments
-- ⏰ Automated monitoring (checks every 10 minutes)
+- 🗄️ Optional MongoDB integration for tracking listings
+- 📧 Email notifications for new apartments
+- ⏰ Automated monitoring (customizable schedule)
 - 🎯 Highly customizable filters
 - 📊 Modular and maintainable code structure
+- ⚙️ Flexible configuration (enable/disable features as needed)
 
 ## Project Structure
 
@@ -24,15 +24,15 @@ idealista-scraper/
 │   ├── config/
 │   │   └── constants.js        # Configuration and constants
 │   ├── services/
-│   │   ├── browser.js          # Browser management (Puppeteer)
 │   │   ├── scraper.js          # Scraping logic
-│   │   ├── database.js         # MongoDB integration
-│   │   ├── notification.js     # WhatsApp notifications (Twilio)
+│   │   ├── httpClient.js       # HTTP client with Scrape.do integration
+│   │   ├── database.js         # MongoDB integration (optional)
+│   │   ├── email.js            # Email notifications (nodemailer)
 │   │   └── monitor.js          # Monitoring coordinator
 │   ├── parsers/
 │   │   └── listingParser.js    # HTML parsing logic
 │   └── utils/
-│       ├── fileWriter.js       # File export utilities
+│       ├── fileWriter.js       # Display utilities
 │       └── helpers.js          # Helper functions
 ├── .env                        # Environment configuration (create from .env.example)
 ├── package.json
@@ -103,41 +103,50 @@ The scraper is configured via environment variables in the `.env` file:
 
 ### Scraper Settings
 
-- **MAX_PAGES**: Maximum number of pages to scrape (default: `3`)
+- **MAX_PAGES**: Maximum number of pages to scrape for one-time runs (default: `3`)
 - **REQUEST_DELAY_MIN**: Minimum delay between requests in ms (default: `3000`)
 - **REQUEST_DELAY_MAX**: Maximum delay between requests in ms (default: `5000`)
 
-### Output Files
-
-- **OUTPUT_JSON**: JSON output filename (default: `apartments.json`)
-- **OUTPUT_CSV**: CSV output filename (default: `apartments.csv`)
-
 ### Monitoring Configuration
 
-#### MongoDB Settings
+#### Feature Toggles
+- **USE_DATABASE**: Enable/disable MongoDB integration (`true`/`false`, default: `true`)
+  - When `false`, uses in-memory cache for duplicate detection
+- **USE_EMAIL_NOTIFICATIONS**: Enable/disable email notifications (`true`/`false`, default: `true`)
+
+#### MongoDB Settings (Optional)
 - **MONGODB_URI**: MongoDB connection string
   - Get from MongoDB Atlas dashboard
   - Format: `mongodb+srv://user:pass@cluster.mongodb.net/`
+  - Required only if `USE_DATABASE=true`
 - **MONGODB_DATABASE**: Database name (default: `idealista_scraper`)
 
-#### Twilio WhatsApp Settings
-- **TWILIO_ACCOUNT_SID**: Your Twilio account SID
-- **TWILIO_AUTH_TOKEN**: Your Twilio authentication token
-- **TWILIO_WHATSAPP_FROM**: Twilio WhatsApp number (sandbox: `+14155238886`)
-- **TWILIO_WHATSAPP_TO**: Recipient WhatsApp number(s) in E.164 format
-  - Single number: `+5511999999999`
-  - Multiple numbers: `+5511999999999,+5521988888888,+34612345678` (comma-separated, no spaces)
-  - All numbers must have joined the Twilio sandbox
+#### Email Notification Settings
+- **EMAIL_SERVICE**: Email service provider (default: `gmail`)
+- **EMAIL_USER**: Sender email address (e.g., `your-email@gmail.com`)
+- **EMAIL_PASSWORD**: Email password or app password
+  - For Gmail: Use App Password (not regular password)
+  - Generate at: Google Account → Security → 2-Step Verification → App passwords
+- **EMAIL_TO**: Recipient email address(es)
+  - Single email: `recipient@example.com`
+  - Multiple emails: `email1@example.com,email2@example.com,email3@example.com` (comma-separated, no spaces)
+
+#### Optional: Custom SMTP Settings
+- **EMAIL_HOST**: SMTP server host (e.g., `smtp.example.com`)
+- **EMAIL_PORT**: SMTP port (default: `587`)
+- **EMAIL_SECURE**: Use secure connection (`true`/`false`)
 
 #### Monitor Settings
 - **MONITOR_SCHEDULE**: Cron schedule for automated checks
-  - `*/10 * * * *` - Every 10 minutes (default)
+  - `*/30 * * * *` - Every 30 minutes (default)
+  - `*/10 * * * *` - Every 10 minutes
   - `*/5 * * * *` - Every 5 minutes
   - `0 * * * *` - Every hour
   - `0 9-18 * * *` - Every hour, 9 AM to 6 PM
+- **MONITOR_MAX_PAGES**: Number of pages to scrape during monitoring (default: `1`)
 - **NOTIFICATION_MODE**: How to send notifications
-  - `summary` (default) - One message with all new apartments
-  - `individual` - Separate message for each apartment
+  - `summary` (default) - One email with all new apartments
+  - `individual` - Separate email for each apartment
 
 ### Example Configurations
 
@@ -190,19 +199,18 @@ The scraper will:
 1. Fetch apartment listings from Idealista.com based on your `.env` configuration
 2. Parse the HTML content
 3. Display the first 3 results in the console
-4. Save all results to JSON and CSV files
 
 ### Automated Monitoring
 
-Run continuous monitoring with WhatsApp notifications:
+Run continuous monitoring with email notifications:
 ```bash
 npm run monitor
 ```
 
 This will:
-1. Check for new apartments every 10 minutes (configurable)
-2. Save new apartments to MongoDB
-3. Send WhatsApp notifications when new listings are found
+1. Check for new apartments on your configured schedule (default: every 30 minutes)
+2. Save new apartments to MongoDB (if enabled)
+3. Send email notifications when new listings are found
 4. Run continuously until stopped (Ctrl+C)
 
 Run a single check:
@@ -212,43 +220,65 @@ npm run monitor:once
 
 ## Setup for Monitoring
 
-### 1. MongoDB Atlas Setup (Free)
+### 1. Email Setup (Gmail Recommended)
+
+#### Using Gmail (Free):
+
+1. **Enable 2-Step Verification:**
+   - Go to [Google Account Security](https://myaccount.google.com/security)
+   - Enable 2-Step Verification if not already enabled
+
+2. **Generate App Password:**
+   - Go to [App Passwords](https://myaccount.google.com/apppasswords)
+   - Select "Mail" and your device
+   - Click "Generate"
+   - Copy the 16-character password
+
+3. **Update `.env`:**
+   ```env
+   USE_EMAIL_NOTIFICATIONS=true
+   EMAIL_SERVICE=gmail
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASSWORD=your-16-char-app-password
+   EMAIL_TO=recipient@example.com
+   ```
+
+#### Multiple Recipients:
+To send notifications to multiple emails, separate them with commas (no spaces):
+```env
+EMAIL_TO=email1@gmail.com,email2@gmail.com,email3@example.com
+```
+
+#### Using Other Email Providers:
+For custom SMTP settings:
+```env
+EMAIL_HOST=smtp.your-provider.com
+EMAIL_PORT=587
+EMAIL_SECURE=false
+EMAIL_USER=your-email@provider.com
+EMAIL_PASSWORD=your-password
+EMAIL_TO=recipient@example.com
+```
+
+### 2. MongoDB Atlas Setup (Optional - Free)
+
+MongoDB is optional. If disabled, the monitor uses in-memory cache for duplicate detection.
 
 1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 2. Sign up for a free account
 3. Create a new cluster (free tier M0)
 4. Click "Connect" → "Connect your application"
 5. Copy the connection string
-6. Update `.env` with your connection string:
+6. Update `.env`:
    ```env
+   USE_DATABASE=true
    MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority
    ```
 
-### 2. Twilio WhatsApp Setup (Free Sandbox)
-
-1. Go to [Twilio](https://www.twilio.com)
-2. Sign up for a free account
-3. Go to [Console](https://console.twilio.com)
-4. Get your **Account SID** and **Auth Token**
-5. Go to **Messaging** → **Try it out** → **Send a WhatsApp message**
-6. Follow instructions to join the Twilio Sandbox:
-   - Send a WhatsApp message to **+1 415 523 8886**
-   - Message format: `join <your-sandbox-code>`
-7. Update `.env`:
-   ```env
-   TWILIO_ACCOUNT_SID=your_account_sid_here
-   TWILIO_AUTH_TOKEN=your_auth_token_here
-   TWILIO_WHATSAPP_FROM=+14155238886
-   TWILIO_WHATSAPP_TO=+5511999999999  # Your WhatsApp number in E.164 format
-   ```
-
-**Multiple Recipients:** To send notifications to multiple WhatsApp numbers, separate them with commas (no spaces):
+**To disable MongoDB:**
 ```env
-TWILIO_WHATSAPP_TO=+5511999999999,+5521988888888,+34612345678
+USE_DATABASE=false
 ```
-**Important:** Each number must join the Twilio sandbox separately by sending the join message.
-
-**Note:** Twilio Sandbox is free but has limitations. For production use, apply for WhatsApp Business API approval.
 
 ### 3. Test Your Setup
 
@@ -258,25 +288,23 @@ npm run monitor:once
 ```
 
 If successful, you should see:
-- ✅ MongoDB connection confirmation
-- ✅ Twilio client initialization
+- ✅ Monitor service initialization
+- ✅ Email service initialized (if enabled)
+- ✅ MongoDB connection (if enabled)
 - 📊 Scraping results
-- 📱 WhatsApp notification (if new apartments found)
+- 📧 Email notification (if new apartments found)
 
 ## Output
 
-The scraper generates two files:
-
-- `apartments.json`: JSON format with all listing data
-- `apartments.csv`: CSV format for spreadsheet applications
-
-Each listing includes:
+The scraper displays results in the console with details including:
 - Title
 - URL
 - Price
 - Number of bedrooms
 - Area (square meters)
 - Tags (e.g., pets allowed)
+
+When monitoring is enabled with email notifications, you'll receive beautifully formatted HTML emails with clickable links to view apartments directly.
 
 ## Development
 
@@ -295,13 +323,15 @@ Each listing includes:
 
 ## How Monitoring Works
 
-1. **Scheduled Execution**: The monitor runs on a schedule (default: every 10 minutes)
-2. **Scraping**: Fetches the first page of apartment listings
-3. **Database Check**: Compares each apartment URL with the database
-4. **New Detection**: Identifies apartments not yet in the database
-5. **Storage**: Saves new apartments to MongoDB with timestamp
-6. **Notification**: Sends WhatsApp message(s) for new findings
-7. **Tracking**: Marks notified apartments to avoid duplicates
+1. **Scheduled Execution**: The monitor runs on a schedule (default: every 30 minutes, configurable)
+2. **Scraping**: Fetches apartment listings from configured number of pages (default: 1 page)
+3. **Duplicate Detection**:
+   - If MongoDB enabled: Compares each apartment URL with the database
+   - If MongoDB disabled: Uses in-memory cache for session-based duplicate detection
+4. **New Detection**: Identifies apartments not yet seen
+5. **Storage**: If MongoDB enabled, saves new apartments with timestamp
+6. **Notification**: Sends email(s) for new findings (if email enabled)
+7. **Tracking**: Marks notified apartments to avoid duplicates (if MongoDB enabled)
 
 ## Tips
 
@@ -317,43 +347,54 @@ pm2 save
 pm2 startup
 ```
 
-### WhatsApp Number Format
+### Email Best Practices
 
-Always use E.164 format for phone numbers:
-- ✅ Correct: `+5511999999999`
-- ❌ Wrong: `11999999999`
-- ❌ Wrong: `+55 11 99999-9999`
+- **Use App Passwords**: Never use your regular Gmail password
+- **Multiple Recipients**: Add all interested parties to `EMAIL_TO`
+- **Check Spam**: First email might land in spam folder
+- **Summary Mode**: Recommended to reduce email volume
 
 ### Monitoring Best Practices
 
-- **Start with 10 minutes**: Don't check too frequently to avoid IP blocks
-- **Use summary mode**: Reduces WhatsApp message spam
+- **Start with 30 minutes**: Don't check too frequently to avoid IP blocks
+- **Use summary mode**: Reduces email volume
 - **Test first**: Run `npm run monitor:once` before continuous monitoring
 - **Monitor logs**: Keep an eye on console output for errors
+- **Adjust pages**: Use `MONITOR_MAX_PAGES=1` for frequent checks, higher for less frequent
 
 ### Cost Considerations
 
+- **Email**: Completely free with Gmail
 - **MongoDB Atlas**: Free tier (512MB) is sufficient for thousands of apartments
-- **Twilio Sandbox**: Free but limited, requires re-joining every 3 days
-- **Twilio Production**: ~$0.005 per WhatsApp message after approval
+- **Scrape.do**: Free tier available, or use your own proxy
+- **Total Cost**: $0 for basic setup!
 
 ## Troubleshooting
 
-### MongoDB Connection Error
+### Email Not Sending
+- Verify App Password is correct (not regular password)
+- Check that 2-Step Verification is enabled
+- Ensure email service and credentials are correct
+- Check spam folder for first email
+- Verify `USE_EMAIL_NOTIFICATIONS=true`
+
+### MongoDB Connection Error (If Enabled)
 - Check your connection string format
 - Verify network access settings in MongoDB Atlas
 - Ensure your IP is whitelisted (or use 0.0.0.0/0 for allow all)
-
-### WhatsApp Not Sending
-- Verify you've joined the Twilio sandbox
-- Check phone number format (E.164)
-- Ensure Twilio credentials are correct
-- Check Twilio console for error messages
+- Try disabling MongoDB: Set `USE_DATABASE=false`
 
 ### No New Apartments Detected
 - Verify search filters in `.env`
 - Check if apartments exist on Idealista
 - Try running the basic scraper first: `npm start`
+- Increase `MONITOR_MAX_PAGES` to check more listings
+
+### Service Initialization Errors
+- Ensure required environment variables are set
+- If not using a service, set its flag to `false`:
+  - `USE_DATABASE=false` to skip MongoDB
+  - `USE_EMAIL_NOTIFICATIONS=false` to skip emails
 
 ## Deployment (Free Hosting)
 
@@ -385,8 +426,10 @@ See [DEPLOYMENT.md](DEPLOYMENT.md)
 ## Notes
 
 - The scraper includes random delays between requests to avoid overloading the server
-- Browser automation is configured with anti-detection measures
-- MongoDB stores apartment URLs to prevent duplicate notifications
+- Uses Scrape.do API to bypass blocking and CAPTCHAs
+- MongoDB is optional - you can use in-memory cache instead
+- Email notifications are free and unlimited with Gmail
+- Flexible configuration allows enabling/disabling features as needed
 - Ensure you comply with Idealista's terms of service and robots.txt
 - Optimized for deployment on Linux-based cloud platforms
 

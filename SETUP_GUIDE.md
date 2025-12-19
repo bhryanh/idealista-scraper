@@ -2,7 +2,50 @@
 
 ## Step-by-Step Setup
 
-### 1. Configure MongoDB Atlas (5 minutes)
+### 1. Configure Email Notifications (5 minutes)
+
+#### Using Gmail (Recommended):
+
+1. **Enable 2-Step Verification:**
+   - Visit https://myaccount.google.com/security
+   - Enable "2-Step Verification" if not already enabled
+
+2. **Generate App Password:**
+   - Go to https://myaccount.google.com/apppasswords
+   - Select "Mail" and your device
+   - Click "Generate"
+   - Copy the 16-character password (spaces can be removed)
+
+3. **Update `.env`:**
+   ```env
+   USE_EMAIL_NOTIFICATIONS=true
+   EMAIL_SERVICE=gmail
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASSWORD=abcd efgh ijkl mnop
+   EMAIL_TO=recipient@example.com
+   ```
+
+**Multiple Recipients (Optional):**
+To receive notifications on multiple emails, separate them with commas (no spaces):
+```env
+EMAIL_TO=email1@gmail.com,email2@gmail.com,email3@example.com
+```
+
+#### Using Other Email Providers:
+```env
+EMAIL_HOST=smtp.your-provider.com
+EMAIL_PORT=587
+EMAIL_SECURE=false
+EMAIL_USER=your-email@provider.com
+EMAIL_PASSWORD=your-password
+EMAIL_TO=recipient@example.com
+```
+
+### 2. Configure MongoDB Atlas (Optional - 5 minutes)
+
+MongoDB is optional. You can disable it to use in-memory cache instead.
+
+**To enable MongoDB:**
 
 1. Visit https://www.mongodb.com/cloud/atlas
 2. Click "Try Free" and create an account
@@ -18,39 +61,17 @@
    - Copy the connection string
 6. Update `.env`:
    ```env
+   USE_DATABASE=true
    MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority
    ```
    Replace `username` and `password` with your credentials
 
-### 2. Configure Twilio WhatsApp (10 minutes)
+**To disable MongoDB:**
+```env
+USE_DATABASE=false
+```
 
-1. Visit https://www.twilio.com
-2. Click "Sign up" and create a free account
-3. Verify your email and phone
-4. Go to https://console.twilio.com
-5. Find your **Account SID** and **Auth Token** on the dashboard
-6. Go to **Messaging** → **Try it out** → **Send a WhatsApp message**
-7. You'll see your sandbox number and join code
-8. From your phone:
-   - Send a WhatsApp message to: **+1 415 523 8886**
-   - Message content: `join <your-code>` (e.g., `join coffee-bicycle`)
-   - You'll receive confirmation
-9. Update `.env`:
-   ```env
-   TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-   TWILIO_AUTH_TOKEN=your_auth_token_here
-   TWILIO_WHATSAPP_FROM=+14155238886
-   TWILIO_WHATSAPP_TO=+5511999999999
-   ```
-   Replace `+5511999999999` with your WhatsApp number in E.164 format
-
-**Multiple Recipients (Optional):**
-To receive notifications on multiple WhatsApp numbers:
-1. Each person sends the join message to **+1 415 523 8886**
-2. Update `.env` with all numbers separated by commas (no spaces):
-   ```env
-   TWILIO_WHATSAPP_TO=+5511999999999,+5521988888888,+34612345678
-   ```
+When disabled, the monitor uses in-memory cache for duplicate detection during the session.
 
 ### 3. Configure Search Filters
 
@@ -69,6 +90,11 @@ AIR_CONDITIONING=true
 ALLOW_PETS=true
 PUBLISHED_FILTER=ultimas-24-horas
 RENTAL_TYPE=alquiler-de-larga-temporada
+
+# Monitoring
+MONITOR_SCHEDULE=*/30 * * * *  # Every 30 minutes
+MONITOR_MAX_PAGES=1  # Number of pages to check
+NOTIFICATION_MODE=summary  # or 'individual'
 ```
 
 ### 4. Test Setup
@@ -79,88 +105,141 @@ Run a single check to verify everything works:
 npm run monitor:once
 ```
 
-Expected output:
+**Expected output (with email and MongoDB enabled):**
 ```
+🔧 Initializing monitor service...
+   Database: enabled
+   Email Notifications: enabled
+Connecting to MongoDB...
 ✅ Connected to MongoDB
-✅ Twilio client initialized
-   Recipients: 1 number(s)
-🔍 Starting apartment check...
-📄 Fetching page 1...
+✅ Email service initialized
+   Recipients: 1 email(s)
+✅ Monitor service initialized
+
+============================================================
+🔍 Starting apartment check at 12/19/2025, 4:30:00 PM
+============================================================
+
+📄 Scraping 1 page(s)...
 ✅ Found X apartments on page 1
+
+📊 Found X apartments total
 ✨ New apartment: [apartment name]
-📤 Sending notifications...
-✅ WhatsApp notification sent (1/1 recipients)
+
+📤 Sending email notifications for 1 new apartment(s)...
+✅ Summary email sent for 1 apartment(s) to 1/1 recipient(s)
+✅ Email notifications sent successfully
+
+📈 Database Statistics:
+   Total apartments: 1
+   Notified: 1
+   Not notified: 0
+
+⏱️  Check completed in 5.43 seconds
+============================================================
 ```
 
-With multiple recipients:
+**Expected output (without MongoDB, only email):**
 ```
-✅ Twilio client initialized
-   Recipients: 3 number(s)
-...
-✅ Summary notification sent for 2 apartment(s) to 3/3 recipient(s)
+🔧 Initializing monitor service...
+   Database: disabled
+   Email Notifications: enabled
+ℹ️  Using in-memory cache for duplicate detection
+✅ Email service initialized
+   Recipients: 2 email(s)
+✅ Monitor service initialized
+
+============================================================
+🔍 Starting apartment check at 12/19/2025, 4:30:00 PM
+============================================================
+
+📄 Scraping 1 page(s)...
+✅ Found X apartments on page 1
+
+📊 Found X apartments total
+✨ New apartment: [apartment name]
+
+📤 Sending email notifications for 1 new apartment(s)...
+✅ Summary email sent for 1 apartment(s) to 2/2 recipient(s)
+✅ Email notifications sent successfully
+
+📈 Cache Statistics:
+   Total seen apartments: 10
+
+⏱️  Check completed in 3.21 seconds
+============================================================
 ```
 
-### 5. Start Monitoring
+### 5. Start Continuous Monitoring
 
-Start continuous monitoring:
+Once everything is working, start continuous monitoring:
 
 ```bash
 npm run monitor
 ```
 
 The monitor will:
-- Run immediately
-- Check every 10 minutes
-- Send WhatsApp notifications for new apartments
-- Run continuously until you stop it (Ctrl+C)
+- Run automatically on your configured schedule
+- Check for new apartments
+- Send email notifications
+- Store apartments in MongoDB (if enabled)
+- Keep running until you stop it (Ctrl+C)
 
-## Common Issues
+## Configuration Examples
 
-### "MONGODB_URI is not defined"
-- Make sure you copied `.env.example` to `.env`
-- Verify the MongoDB URI is correctly set in `.env`
+### Minimal Setup (No MongoDB):
+```env
+USE_DATABASE=false
+USE_EMAIL_NOTIFICATIONS=true
 
-### "Error connecting to MongoDB"
-- Check your IP is whitelisted in MongoDB Atlas
-- Verify username and password in connection string
-- Try using `0.0.0.0/0` to allow all IPs (for testing)
+EMAIL_SERVICE=gmail
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASSWORD=your-app-password
+EMAIL_TO=recipient@example.com
 
-### WhatsApp messages not sending
-- Verify you joined the Twilio sandbox
-- Check your phone number format: `+5511999999999`
-- Ensure Account SID and Auth Token are correct
-- The sandbox number only works after joining
+MONITOR_SCHEDULE=*/30 * * * *
+MONITOR_MAX_PAGES=1
+```
 
-### "No apartments found"
-- Verify your search filters in `.env`
-- Try broader filters (remove some restrictions)
-- Check if apartments exist on Idealista with these filters
+### Full Setup (MongoDB + Email):
+```env
+USE_DATABASE=true
+USE_EMAIL_NOTIFICATIONS=true
 
-## Phone Number Format
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
+MONGODB_DATABASE=idealista_scraper
 
-Your WhatsApp number must be in **E.164 format**:
+EMAIL_SERVICE=gmail
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASSWORD=your-app-password
+EMAIL_TO=email1@example.com,email2@example.com
 
-- ✅ **Correct**: `+5511999999999` (country code + number)
-- ❌ **Wrong**: `11999999999` (missing +55)
-- ❌ **Wrong**: `+55 11 99999-9999` (has spaces/dashes)
+MONITOR_SCHEDULE=*/30 * * * *
+MONITOR_MAX_PAGES=1
+NOTIFICATION_MODE=summary
+```
 
-Examples:
-- Brazil: `+5511999999999`
-- Spain: `+34612345678`
-- Portugal: `+351912345678`
+## Troubleshooting
+
+### Email Not Sending
+- Check that 2-Step Verification is enabled
+- Verify App Password is correct
+- Check spam folder for first email
+- Make sure `USE_EMAIL_NOTIFICATIONS=true`
+
+### MongoDB Connection Issues
+- Verify connection string format
+- Check IP whitelist in MongoDB Atlas
+- Try disabling MongoDB: `USE_DATABASE=false`
+
+### No Apartments Found
+- Verify your search filters
+- Check if apartments exist on Idealista
+- Try running: `npm start` first
 
 ## Next Steps
 
-Once everything is working:
-
-1. **Adjust schedule**: Change `MONITOR_SCHEDULE` in `.env`
-2. **Run in background**: Use PM2 for production (see README.md)
-3. **Customize filters**: Adjust search parameters in `.env`
-4. **Monitor logs**: Keep an eye on output for any issues
-
-## Support
-
-For issues, check:
-1. README.md - Full documentation
-2. .env.example - Configuration reference
-3. Console output - Error messages
+- Configure deployment (see DEPLOYMENT.md)
+- Set up process manager (PM2)
+- Monitor logs for errors
+- Adjust schedule based on your needs

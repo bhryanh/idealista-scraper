@@ -104,18 +104,9 @@ const SCRAPER_SETTINGS = {
   maxPages: parseInt(process.env.MAX_PAGES) || 3,
 };
 
-/**
- * Output file names
- */
-const OUTPUT_FILES = {
-  json: process.env.OUTPUT_JSON || "apartments.json",
-  csv: process.env.OUTPUT_CSV || "apartments.csv",
-};
-
 module.exports = {
   BASE_URL,
   SEARCH_URL,
   SCRAPE_DO_CONFIG,
   SCRAPER_SETTINGS,
-  OUTPUT_FILES,
 };
